@@ -5,6 +5,10 @@ read files from "data_folder/" + codice_stazione + ".csv" into
 
 
 """
+import glob, os
+import numpy as np
+import pandas as pd
+
 input_csv_dialect =  {
     "field separator" : ";", 
     "decimal separator" : ".", 
@@ -15,13 +19,18 @@ input_csv_dialect =  {
 # stazioni.csv: UTF-8 Unicode text
 stations_metadata_file = "./dati/stazioni.csv"
 # single station data files are ASCII text
-#station_science_data_files = 
-import csv 
+metadata = pd.read_csv(stations_metadata_file, sep=";")
 
+lombardia_files = glob.glob("dati/lmb[0-9][0-9][0-9].csv")
+lombardia_df = pd.DataFrame()
 
-# create reader object
-with open(stations_metadata_file) as my_file:
-    reader = csv.reader(my_file, dialect="unix")
-    for row in reader:
-        print(row)
-
+for station_file in lombardia_files:
+    
+    station_df = pd.read_csv(station_file, sep=";")
+    #print(station_df.shape)
+    station_columns = station_df.columns
+    if not (station_columns[1] == "datetime"):
+        print(station_file)
+        print("no datetime")
+    #lombardia_df = pd.merge(lombardia_df, station_df, on="datetime")
+    

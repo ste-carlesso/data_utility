@@ -6,15 +6,14 @@ temp min med max t
 
 un unico file 
 colonna a date 1-11-12 al 18
-foglio per ogniuno dei tre parametri
+foglio per ognuno dei tre parametri
 nomi
 
 data
-nome stazione (= solo nome comune; comune e 
-parametro
+nome stazione (= solo nome comune OR comune e area)
 
-i dati non sono continuativi ma non 
-
+i dati non sono continuativi in input
+devono essere continui in output
 separatore virgola
 1 decimale solo
 
