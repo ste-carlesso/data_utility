@@ -1,0 +1,23 @@
+Inserimento dei dati di meteonetwork.
+comune e area
+
+destinazione virgola.
+temp min med max t
+
+un unico file 
+colonna a date 1-11-12 al 18
+foglio per ogniuno dei tre parametri
+nomi
+
+data
+nome stazione (= solo nome comune; comune e 
+parametro
+
+i dati non sono continuativi ma non 
+
+separatore virgola
+1 decimale solo
+
+ordine delle stazionu.xls
+
+xlsx
