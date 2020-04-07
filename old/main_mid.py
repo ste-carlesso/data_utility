@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Apr  6 12:34:49 2020
+
 @author: Stefano Carlesso
+
 simple: solo Lombardia
 """
-
 import glob
 import pandas as pd
-
-def checkIfDuplicates_1(listOfElems):
-    ''' Check if given list contains any duplicates '''
-    if len(listOfElems) == len(set(listOfElems)):
-        return False
-    else:
-        return True
 
 # this file was manually checked
 metadata_file = "./stazioni_good.csv"
 subset = "Lombardia"
 parameter_list = ["t_min", "t_med", "t_max"]
 station_file_list = glob.glob("dati/lmb[0-9][0-9][0-9].csv")
-
+#station_file_list = glob.glob("dati/lmb00[2-5].csv")
 metadata_df = pd.read_csv(
     filepath_or_buffer = metadata_file, 
     sep=";",
@@ -32,15 +26,15 @@ metadata_df = pd.read_csv(
 metadata_df = metadata_df[metadata_df["regione"] == subset]
 metadata_series = pd.Series(metadata_df["label_good"])
 df2_list = []
-#output format is an excel spreadsheet xlsx, with three tabs
-tabs = {"t_min":"minima", "t_med":"media", "t_max":"massima"}
-#output_file = "temperature.xlsx"
-# with pd.ExcelWriter(output_file) as writer:
 
 for parameter in parameter_list:
     """iterate to obtain tmin tmed tmax"""
     df1_list = []
-
+    # summary_dict = {
+    #     "station": [], 
+    #     "first_day": [], 
+    #     "last_day": [],
+    #     }
     for station_file in station_file_list:
         station_id = station_file[5:11]
         station_label = metadata_series[station_id]
@@ -52,9 +46,11 @@ for parameter in parameter_list:
             usecols = ["datetime", parameter],
             index_col = 0,
         )
+        # summary_dict["station"].append(station_label)
+        # summary_dict["first_day"].append(min(df1.index)) 
+        # summary_dict["last_day"].append(max(df1.index))
         df1 = df1.rename(columns = {parameter: station_label})
         df1_list.append(df1)
-
     df2 = pd.concat(
         objs = df1_list,
         axis = "index",
@@ -62,12 +58,5 @@ for parameter in parameter_list:
         verify_integrity = False,    
     )
     df2_list.append(df2)
-    # df2.to_excel(
-    #     excel_writer = writer, 
-    #     sheet_name = tabs[parameter],
-    # )
-    output_file = tabs[parameter] + ".csv"
-    df2.to_csv(
-        output_file,
-        sep= ";",
-        )
+    
+
