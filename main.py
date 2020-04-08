@@ -8,12 +8,6 @@ simple: solo Lombardia
 import glob
 import pandas as pd
 
-def checkIfDuplicates_1(listOfElems):
-    ''' Check if given list contains any duplicates '''
-    if len(listOfElems) == len(set(listOfElems)):
-        return False
-    else:
-        return True
 
 # this file was manually checked
 metadata_file = "./stazioni_good.csv"
@@ -40,7 +34,6 @@ tabs = {"t_min":"minima", "t_med":"media", "t_max":"massima"}
 for parameter in parameter_list:
     """iterate to obtain tmin tmed tmax"""
     df1_list = []
-
     for station_file in station_file_list:
         station_id = station_file[5:11]
         station_label = metadata_series[station_id]
@@ -50,12 +43,13 @@ for parameter in parameter_list:
             decimal = ".",
             header =  0,
             usecols = ["datetime", parameter],
-            index_col = 0,
+            #index_col = 0,
         )
         df1 = df1.rename(columns = {parameter: station_label})
         df1_list.append(df1)
 
-    df2 = pd.concat(
+    
+    df2 = pd.merge(
         objs = df1_list,
         axis = "index",
         join = "outer",
