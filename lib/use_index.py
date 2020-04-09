@@ -19,7 +19,6 @@ def checkIfDuplicates_1(listOfElems):
 metadata_file = "./stazioni_good.csv"
 subset = "Lombardia"
 parameter_list = ["t_min", "t_med", "t_max"]
-tabs = {"t_min":"minima", "t_med":"media", "t_max":"massima"}
 station_file_list = glob.glob("dati/lmb[0-9][0-9][0-9].csv")
 
 metadata_df = pd.read_csv(
@@ -33,7 +32,10 @@ metadata_df = pd.read_csv(
 metadata_df = metadata_df[metadata_df["regione"] == subset]
 metadata_series = pd.Series(metadata_df["label_good"])
 df2_list = []
-
+#output format is an excel spreadsheet xlsx, with three tabs
+tabs = {"t_min":"minima", "t_med":"media", "t_max":"massima"}
+#output_file = "temperature.xlsx"
+# with pd.ExcelWriter(output_file) as writer:
 
 for parameter in parameter_list:
     """iterate to obtain tmin tmed tmax"""
@@ -48,28 +50,23 @@ for parameter in parameter_list:
             decimal = ".",
             header =  0,
             usecols = ["datetime", parameter],
-            index_col = 0,
+            #index_col = 0,
         )
         df1 = df1.rename(columns = {parameter: station_label})
         df1_list.append(df1)
-    # df2 is 
+
     df2 = pd.concat(
         objs = df1_list,
         axis = 1,
         #join = "left",
     )
-    df2.fillna(-999)
-    df2["data_italiana"] = df2["datetime"]
-    
     df2_list.append(df2)
-    output_file = "output/" + tabs[parameter] + ".csv"
+    # df2.to_excel(
+    #     excel_writer = writer, 
+    #     sheet_name = tabs[parameter],
+    # )
+    output_file = tabs[parameter] + ".csv"
     df2.to_csv(
         output_file,
         sep= ";",
-        decimal=","
         )
-    #output format is an excel spreadsheet xlsx, with three tabs
-    
-    output_file = "output/" + tabs[parameter] + ".xlsx"
-    with pd.ExcelWriter(output_file) as writer:
-        df2.to_excel(excel_writer = writer,sheet_name = tabs[parameter],)

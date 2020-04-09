@@ -59,7 +59,7 @@ for parameter in parameter_list:
         #join = "left",
     )
     df2.fillna(-999)
-    df2["data_italiana"] = df2["datetime"]
+    # df2["data_italiana"] = df2["datetime"]
     
     df2_list.append(df2)
     output_file = "output/" + tabs[parameter] + ".csv"

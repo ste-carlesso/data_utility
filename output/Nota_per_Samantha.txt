@@ -1,0 +1,10 @@
+
+Nota:
+Le stazioni della Lombardia sono 94.
+Il periodo dal 2012-11-01 al 2018-12-31.
+Il periodo è di 6 anni e qualche mese, quindi mi suona giusto che i record (giorni di osservazione) siano 2252.
+
+A spanne: 6 anni per  365 giorni uguale 2190 record.
+Le colonne del file "temperature.xls" non non sono nello stesso ordine delle righe di "dati/stazioni.csv".
+
+La prima colonna di "temperature.xls", ha la data in formato "AAAA-MM-GG" invece che "GG/MM/AAAA".
