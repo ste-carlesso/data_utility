@@ -2,18 +2,11 @@
 """
 Created on Mon Apr  6 12:34:49 2020
 @author: Stefano Carlesso
-simple: solo Lombardia
+Lombardia e Piemonte
 """
 
 import glob
 import pandas as pd
-
-def checkIfDuplicates_1(listOfElems):
-    ''' Check if given list contains any duplicates '''
-    if len(listOfElems) == len(set(listOfElems)):
-        return False
-    else:
-        return True
 
 # this file was manually checked
 metadata_file = "./stazioni_good.csv"
