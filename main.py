@@ -8,12 +8,13 @@ Lombardia e Piemonte
 import glob
 import pandas as pd
 
+
+
 # this file was manually checked
 metadata_file = "./stazioni_good.csv"
-subset = "Lombardia"
+
 parameter_list = ["t_min", "t_med", "t_max"]
 tabs = {"t_min":"minima", "t_med":"media", "t_max":"massima"}
-station_file_list = glob.glob("dati/lmb[0-9][0-9][0-9].csv")
 
 metadata_df = pd.read_csv(
     filepath_or_buffer = metadata_file, 
@@ -25,8 +26,10 @@ metadata_df = pd.read_csv(
     )
 metadata_df = metadata_df[metadata_df["regione"] == subset]
 metadata_series = pd.Series(metadata_df["label_good"])
+
 df2_list = []
 
+station_file_list = glob.glob("/lmb[0-9][0-9][0-9].csv")
 
 for parameter in parameter_list:
     """iterate to obtain tmin tmed tmax"""
