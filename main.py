@@ -8,8 +8,6 @@ Lombardia e Piemonte
 import glob
 import pandas as pd
 
-
-
 # this file was manually checked
 metadata_file = "./stazioni_good.csv"
 

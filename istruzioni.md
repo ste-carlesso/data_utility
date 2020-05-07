@@ -46,3 +46,18 @@ sono in ora locale.
 sarebbe da trasformarli in ora solare UTC+1
 
 Al poste delle 00:00 . mettere 24:00 del giorno precedente
+
+
+    Many progresses
+    
+    + Read csv files using csv.DictReader.
+    + Convert date string to datetime object.
+    + Convert temperature from string to float.
+    + Find a way to deal with local time to solar time.
+    + Use Station name (label) instead of Station id.
+    
+    TODO
+    
+    + Only one decimal in temperature.
+    + Write results to Excel file.
+    + convert 24:00 to 00:00.
