@@ -20,9 +20,9 @@ with open(metadata_file) as a_file:
         metadata_dict[ metadata_row["code"] ] =  metadata_row["label_good"]
         
 
-filename_list = glob.glob("input/lmb[0-9][0-9][0-9].csv")
-#filename_list = glob.glob("input/lmb080.csv")
-output_file = "output/Temp_MetNet_suborarie.xlsx"
+#filename_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
+filename_list = glob.glob("input/pmn047.csv")
+output_file = "output/Temp_MetNet_piedmont.xlsx"
 
 one_hour = timedelta(hours=1)
 #italy = pytz.timezone("Europe/Rome")
@@ -31,15 +31,16 @@ utc = pytz.timezone("UTC")
 # solar time, aka UTC+1, aka Central European Time
 solar = pytz.timezone("CET")
 
+
+
 # create an Excel Workbook to hold all stations
 # TODO maybe set iso_dates=True 
 wb = Workbook(write_only=True)
 ws0 = wb.create_sheet("metadata")
 ws0.append(["Questo file Excel riporta le temperature di alcune stazioni MeteoNetwork."])
-ws0.append(["italy_dt è la marca temporale riportata nei dati forniti da MeteoNetwork, che interpretiamo come riferita all'ora Italiana;"])
-ws0.append(["L'orario in vigore in Italia si discosta di 1 o 2 ore dall'ora in UTC, a seconda della stagione."])
-ws0.append(["utc_td  è la marca temporale riferita a Tempo Universale Coordinato."])
-ws0.append(["solar_dt è invece riferita a UTC+1, quindi indipendente dai periodi in cui vige l'ora legale."])
+ws0.append(["italy_datetime è la marca temporale presente nei dati forniti da MeteoNetwork, che interpretiamo come riferita all'ora Italiana;"])
+ws0.append(["solar_dt è invece riferita a UTC+1 (CET), quindi indipendente dai periodi in cui vige l'ora legale."])
+ws0.append(["L'orario in vigore in Italia si discosta di 0 o 1 ore dall'ora in UTC, a seconda della stagione."])
 for filename in filename_list:
     # get station_id from filename
     station_id = filename[6:12]
