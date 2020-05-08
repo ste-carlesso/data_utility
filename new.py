@@ -67,7 +67,7 @@ for filename in filename_list:
             italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
             # solar_datetime is timezone-aware
             solar_datetime = italy_datetime.astimezone(solar)
-            naive_solar_datetime = solar_datetime.replace(tzinfo=None)
+            solar_timestring = str(solar_datetime)
             try:
                 temperature = round(float(row["temperature"]), ndigits=1)
             except: 
