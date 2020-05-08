@@ -9,7 +9,8 @@ from datetime import datetime
 from datetime import timedelta
 #import dateutil
 import pytz
-from openpyxl import Workbook
+#from openpyxl import Workbook
+import xlsxwriter
 
 debug = True
 
@@ -41,8 +42,8 @@ solar = pytz.timezone("CET")
 
 # create an Excel Workbook to hold all stations
 # TODO maybe set iso_dates=True 
-wb = Workbook(write_only=True)
-ws0 = wb.create_sheet("metadata")
+wb = xlsxwriter.Workbook(output_file)
+ws0 = wb.add_worksheet("metadata")
 ws0.append(["Questo file Excel riporta le temperature di alcune stazioni MeteoNetwork."])
 ws0.append(["italy_datetime è la marca temporale presente nei dati forniti da MeteoNetwork, che interpretiamo come riferita all'ora Italiana;"])
 ws0.append(["solar_dt è invece riferita a UTC+1 (CET), quindi indipendente dai periodi in cui vige l'ora legale."])
@@ -54,7 +55,7 @@ for filename in filename_list:
     station_label = metadata_dict[station_id]
     print(station_id, station_label)
     # create a sheet for the station
-    ws = wb.create_sheet(title=station_label)
+    ws = wb.add_worksheet(title=station_label)
     # append the column header to sheet
     ws.append(["italy_datetime", "solar_datetime", station_label])
     with open(filename) as file:
@@ -77,6 +78,6 @@ for filename in filename_list:
             ws.append(out_row)
             if debug:
                 print(out_row)
-wb.save(output_file)
+wb.close()
         
     
