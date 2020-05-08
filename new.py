@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-@author: Carlesso
+@author: Stefano Carlesso
+<s.carlesso#fondazioneomd.it>
 """
 import glob
 import csv
@@ -9,6 +10,8 @@ from datetime import timedelta
 #import dateutil
 import pytz
 from openpyxl import Workbook
+
+debug = True
 
 metadata_file = "./stazioni_good.csv"
 metadata_dict = dict()
@@ -19,10 +22,14 @@ with open(metadata_file) as a_file:
     for metadata_row in metadata_reader:
         metadata_dict[ metadata_row["code"] ] =  metadata_row["label_good"]
         
+if debug:
+    filename_list = glob.glob("input/lmb080.csv")
+else:
+    # TODO check for errors
+    filename_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
 
-#filename_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
-filename_list = glob.glob("input/pmn047.csv")
-output_file = "output/Temp_MetNet_piedmont.xlsx"
+unix_timestamp = int(datetime.timestamp(datetime.now()))
+output_file = "suborari/Temp_MetNet_suborari{}.xlsx".format(unix_timestamp)
 
 one_hour = timedelta(hours=1)
 #italy = pytz.timezone("Europe/Rome")
@@ -30,7 +37,6 @@ utc = pytz.timezone("UTC")
 #it_timezone = dateutil.tz.gettz("Europe/Rome")
 # solar time, aka UTC+1, aka Central European Time
 solar = pytz.timezone("CET")
-
 
 
 # create an Excel Workbook to hold all stations
@@ -57,8 +63,11 @@ for filename in filename_list:
         reader = csv.DictReader(file, delimiter=";", )
         for row in reader:
             # "2013-06-20 00:30:00"
+            # italy_datetime is naive
             italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
+            # solar_datetime is timezone-aware
             solar_datetime = italy_datetime.astimezone(solar)
+            naive_solar_datetime = solar_datetime.replace(tzinfo=None)
             try:
                 temperature = round(float(row["temperature"]), ndigits=1)
             except: 
@@ -66,7 +75,8 @@ for filename in filename_list:
             # append a record 
             out_row = [ italy_datetime, solar_datetime, temperature ]
             ws.append(out_row)
-            #print(out_row)
+            if debug:
+                print(out_row)
 wb.save(output_file)
         
     
