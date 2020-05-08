@@ -5,8 +5,8 @@
 import glob
 import csv
 from datetime import datetime
-#from datetime import timedelta
-import dateutil
+from datetime import timedelta
+#import dateutil
 import pytz
 from openpyxl import Workbook
 
@@ -20,15 +20,16 @@ with open(metadata_file) as a_file:
         metadata_dict[ metadata_row["code"] ] =  metadata_row["label_good"]
         
 
-#filename_list = glob.glob("input/lmb[0-9][0-9][0-9].csv")
-filename_list = glob.glob("input/lmb080.csv")
-#filename_list = glob.glob("input/pyc000.txt")
-output_file = "output/temperatureOrarieMN.xlsx"
+filename_list = glob.glob("input/lmb[0-9][0-9][0-9].csv")
+#filename_list = glob.glob("input/lmb080.csv")
+output_file = "output/Temp_MetNet_suborarie.xlsx"
 
-#one_hour = timedelta(hours=1)
-italy = pytz.timezone("Europe/Rome")
+one_hour = timedelta(hours=1)
+#italy = pytz.timezone("Europe/Rome")
 utc = pytz.timezone("UTC")
 #it_timezone = dateutil.tz.gettz("Europe/Rome")
+# solar time, aka UTC+1, aka Central European Time
+solar = pytz.timezone("CET")
 
 # create an Excel Workbook to hold all stations
 # TODO maybe set iso_dates=True 
@@ -48,27 +49,23 @@ for filename in filename_list:
     # create a sheet for the station
     ws = wb.create_sheet(title=station_label)
     # append the column header to sheet
-    ws.append(["naive_datetime", "italy_datetime", station_label])
+    ws.append(["italy_datetime", "solar_datetime", station_label])
     with open(filename) as file:
         # csv header is 
         # code;datetime;temperature
         reader = csv.DictReader(file, delimiter=";", )
         for row in reader:
             # "2013-06-20 00:30:00"
-            naive_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
-            italy_datetime = italy.localize(naive_datetime)
-            utc_datetime = utc.(naive_datetime)
-            #solar_dt = utc_dt + one_hour
+            italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
+            solar_datetime = italy_datetime.astimezone(solar)
             try:
                 temperature = round(float(row["temperature"]), ndigits=1)
             except: 
                 temperature = -999.9
             # append a record 
-            #(["italy_dt", "utc_dt", "solar_dt", station_label])
-            #ws.append( [ italy_dt, utc_dt, solar_dt, temperature ])
-            out_row = [ naive_datetime, utc_datetime, temperature ]
+            out_row = [ italy_datetime, solar_datetime, temperature ]
             ws.append(out_row)
-            print(out_row)
+            #print(out_row)
 wb.save(output_file)
         
     
