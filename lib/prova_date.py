@@ -1,21 +1,17 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May  7 00:05:11 2020
-
-@author: Carlesso
-"""
-
-
-
-
-from datetime import datetime, timedelta
+import datetime
 import pytz
 
-one_hour = timedelta(hours=1)
+# source https://janakiev.com/blog/time-and-timezones-in-python/
+timestring =  "2013-06-20 00:30:00"
+naive_datetime = datetime.datetime.strptime(timestring, "%Y-%m-%d %H:%M:%S")
+print(naive_datetime)
+print(naive_datetime.tzinfo)
+ita = pytz.timezone("Europe/Rome")
+aware_datetime = ita.localize(naive_datetime)
+print(aware_datetime)
+print(aware_datetime.tzinfo)
 
-italy = pytz.timezone("Europe/Rome")
-utc = pytz.timezone("UTC")
-naive_dt = datetime.fromisoformat('2017-05-30 14:00:00')
-italy_dt = italy.localize(naive_dt)
-utc_dt = italy_dt.astimezone(utc)
-solar_dt = utc_dt + one_hour
+#utc =pytz.utc
+
+#utc_datetime = naive_datetime.astimezone(utc)
+# solar_datetime is timezone-aware
