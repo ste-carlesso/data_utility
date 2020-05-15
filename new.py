@@ -3,52 +3,57 @@
 @author: Stefano Carlesso
 <s.carlesso#fondazioneomd.it>
 """
-import glob
+from glob import glob
 import csv
 from datetime import datetime
 from datetime import timedelta
-#import dateutil
 import pytz
 import xlsxwriter
+import os
+#import shutils
 
 ## settings
 debug = False
 metadata_file = "./stazioni_good.csv"
-
-if debug:
-    filename_list = glob.glob("input/yyy000.csv")
-else:
-    # TODO check for errors
-    filename_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
-
-
-
+utc = pytz.timezone("UTC")
+filename_list = glob("fomd3/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
 metadata_dict = dict()
+
 with open(metadata_file) as a_file:
-    # csv header is 
-    # code;latitudine;longitudine;altitudineslm;strumentazione;regione;comune;area;provincia;label_tmp;label_good
+    """ csv header is 
+    code;latitudine;longitudine;altitudineslm;strumentazione;regione;comune;
+    area;provincia;label_tmp;label_good"""
     metadata_reader = csv.DictReader(a_file, delimiter=";", )
     for metadata_row in metadata_reader:
         metadata_dict[ metadata_row["code"] ] =  metadata_row["label_good"]
 
-#it_timezone = dateutil.tz.gettz("Europe/Rome")
-#italy = pytz.timezone("Europe/Rome")
+# def preproc():
+#     """Unite files with the same name in different directories"""
+#     list2 = glob("fomd2/*")
+#     #os.mkdir("fomd3")
+#     shutils.copy("fomd1", "fomd3")
+#     for fname in list2:
+#         with open(fname) as fobj:
+#             reader = csv.DictReader(file, delimiter=";", )
+#             for row_counter, row in enumerate(reader):
+#                 # "2013-06-20 00:30:00"
+#                 # italy_datetime is naive
 
-# solar time, aka UTC+1, aka Central European Time
-#solar = pytz.timezone("CET")
-
-
-
-for filename in filename_list:
+def elaborate(my_input):
+    """ elaborate my_input, that is a single csv file corresponding to a 
+    single station."""
     # get station_id from filename
-    station_id = filename[6:12]
+    station_id = my_input[6:12]
     # convert it to a pretty label
     station_label = metadata_dict[station_id]
     print(station_id, station_label)
     # output to ever new dir
     creation_timestamp = int(datetime.timestamp(datetime.now()))
     # TODO create folder if not exists
-    output_file = "suborari2/Temp_suborari_{}.xlsx".format(station_label)    
+    dest_dir_name = "suborari_{}".format(creation_timestamp)
+    if not os.path.exists(dest_dir_name):
+        os.mkdir(dest_dir_name)
+    output_file = "{}/Temp_suborari_{}.xlsx".format(dest_dir_name, station_label)    
     
     # create an Excel Workbook for any station
     wb = xlsxwriter.Workbook(output_file)
@@ -78,7 +83,7 @@ for filename in filename_list:
             # italy_datetime is naive
             naive_italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
             
-            utc = pytz.timezone("UTC")
+
             
             aware_utc_datetime = naive_italy_datetime.astimezone(utc)
             # solar_datetime is timezone-aware
@@ -102,7 +107,7 @@ for filename in filename_list:
 
             
             excel_date_format = wb.add_format({"num_format": "yyyy-mm-dd hh:mm"})
-            excel_float_format = wb.add_format({"num_format": "0,0"})
+            #excel_float_format = wb.add_format({"num_format": "0,0"})
             # append single cells
             ws.write_datetime(row_counter + 1, 0, naive_italy_datetime, excel_date_format)
             ws.write_datetime(row_counter + 1, 1, naive_utc_datetime, excel_date_format)
@@ -110,5 +115,12 @@ for filename in filename_list:
             ws.write(row_counter + 1, 3, temperature)
             
         wb.close()
-        
-    
+
+def elaborate_all(my_list):
+    """Elaborate all files in my_list"""
+    for filename in my_list:
+        # put here the function to elaborate one station
+        elaborate(my_input = filename)
+        pass
+
+#elaborate("input/)
