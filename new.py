@@ -14,9 +14,10 @@ import xlsxwriter
 ## settings
 debug = False
 metadata_file = "./stazioni_good.csv"
+utc = pytz.timezone("UTC")
 
 if debug:
-    filename_list = glob.glob("input/yyy000.csv")
+    filename_list = glob.glob("input/lmb179.csv")
 else:
     # TODO check for errors
     filename_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
@@ -78,7 +79,7 @@ for filename in filename_list:
             # italy_datetime is naive
             naive_italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
             
-            utc = pytz.timezone("UTC")
+
             
             aware_utc_datetime = naive_italy_datetime.astimezone(utc)
             # solar_datetime is timezone-aware

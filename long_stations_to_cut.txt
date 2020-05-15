@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri May 15 10:40:40 2020
+
+@author: Carlesso
+
+
+lmb179;45,5100361481069;9,5751686085714;125;Davis Vantage Pro Plus 2;Lombardia;Treviglio;;BG;Treviglio;Treviglio
+lmb175;45,07;8,85;76;Davis Vantage Pro 2;Lombardia;Mezzana Bigli;;PV;Mezzana Bigli;Mezzana Bigli
+
+"""
