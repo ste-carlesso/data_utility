@@ -63,9 +63,15 @@ Al poste delle 00:00 . mettere 24:00 del giorno precedente
     + convert 24:00 to 00:00.
     
     Ciao Stefano,
-non uccidermi ma ho ancora un problema con Meteonetwork suborario: in pratica i dati di Mezzana Bigli e di Treviglio sono talmente tanti (hanno il dettaglio al minuto) che non ci stanno tutti sul file excel! Mezzana mi si ferma al 2015...
+non uccidermi ma ho ancora un problema con Meteonetwork suborario: in pratica i dati di Mezzana Bigli e di Treviglio sono talmente tanti
+(hanno il dettaglio al minuto) che non ci stanno tutti sul file excel! Mezzana mi si ferma al 2015...
 Credo che per almeno queste due stazioni bisogna prevedere tre file (2013-2014, 2015-2016,2017-2018).
 Se farlo solo per due è un problema, possiamo valutare di farlo per tutte le stazioni lo spezzettamento in tre.
+
+Facciamolo per tutte.
+aggiungere alla fine le annate a cui si riferiscono.
+orari di fine misura.
+
 
 Ciao
 Samantha
@@ -80,5 +86,11 @@ Created on Fri May 15 10:40:40 2020
 
 lmb179;45,5100361481069;9,5751686085714;125;Davis Vantage Pro Plus 2;Lombardia;Treviglio;;BG;Treviglio;Treviglio
 lmb175;45,07;8,85;76;Davis Vantage Pro 2;Lombardia;Mezzana Bigli;;PV;Mezzana Bigli;Mezzana Bigli
-
 """
+
+
+aggregare al dato orario
+
+sono orari di fine misura
+con ora solare
+da 00:01 --01:00 fa dato orario 

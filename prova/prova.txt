@@ -1,2 +1,0 @@
-code;datetime;temperature
-lmb080;2013-06-20 00:30:00;25.20
