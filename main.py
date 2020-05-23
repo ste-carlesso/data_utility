@@ -3,13 +3,27 @@
 @author: Stefano Carlesso
 <s.carlesso#fondazioneomd.it>
 """
+"""
+To apply your own or another library’s functions to pandas objects, you should be aware of the three methods below. The appropriate method to use depends on whether your function expects to operate on an entire DataFrame or Series, row- or column-wise, or elementwise.
+
+    Tablewise Function Application: pipe()
+
+    Row or Column-wise Function Application: apply()
+
+    Aggregation API: agg() and transform()
+
+    Applying Elementwise Functions: applymap()
+
+Tablewise function application¶
+"""
 import os # misc
-import squint # tabular data
-from datetime import datetime, timedelta # standard date functions and 
+from datetime import datetime, timedelta # standard date functions
 import pytz # definitions for wall times
 import glob # wildcard for filenames matching
-import csv # read ean write csv files
-import xlsxwriter # write Excel files
+#import csv # read and write csv files
+#import xlsxwriter # write Excel files
+import pandas as pd
+import math
 
 
 def convert_temperature(raw_temp):
@@ -19,93 +33,77 @@ def convert_temperature(raw_temp):
         temperature = -999.9
     return temperature
 
-
 def str2dt(string):
     """return a datetime object from the corresponding time string"""
     # "2013-06-20 00:30:00" 
     dt = datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
     return dt
 
+def naive2aware(naive_dt):
+    """convert a naive Italy wall time to timezone-aware dt,
+    with variable offset from UTC"""
+    aware_dt = pytz.timezone("Europe/Rome").localize(naive_dt)
+    return aware_dt
 
-def wall2utc(naive_ita_dt):
-    """convert a Datetime from Italy wall time to UTC"""
-    utc = pytz.timezone("UTC")
-    aware_utc_dt = naive_ita_dt.astimezone(utc)
-    # trasform aware to naive for the benefit of poor xlsxwriter
-    naive_utc_dt = aware_utc_dt.replace(tzinfo=None)
-    return naive_utc_dt
+def ita2utc(ita_dt):
+    """?"""
+    #Return a datetime object with new tzinfo attribute tz, adjusting the date 
+    # and time data so the result is the same UTC time as self, but in tz’s local time.
+    utc_dt = ita_dt.astimezone(pytz.timezone("UTC"))
+    return utc_dt
 
+def utc2solar(utc_dt):
+    """from UTC datetime to UTC+1 (fixed offset)"""
+    #Return a datetime object with new tzinfo attribute tz, adjusting the date 
+    # and time data so the result is the same UTC time as self, but in tz’s local time.
+    solar_dt = utc_dt.astimezone(pytz.timezone("CET"))
+    return solar_dt
 
-def utc2solar(naive_utc_dt):
-    """from UTC datetime to UTC+1"""
-    naive_solar_dt = naive_utc_dt + timedelta(hours=1)
-    return naive_solar_dt
-
-
-def make_dataset(csv_file):
-    """take a csv and read data into a query object"""
-    select = squint.Select(csv_file, delimiter=";")
-    query1 = select(["code", "datetime", "temperature"])
-    #query2 = select(["code", "datetime", "temperature",])
-    return query1
-
-def add_columns():
-    """Add columns for UTC and solar dt"""
-    
-
-def interesting(datetime, start, end):
+def interesting(dt, start, end):
     """Return True if datetime is between start and end, otherwise return False."""
-    return datetime >= start and datetime <= end
+    return dt >= start and dt <= end
 
 #def narrow_period():
-    
 
-def associate(station_code):
+def create_label(station_code):
     """read a station code (str) and returns a station name (str)"""
-    select = squint.Select("stations.csv")
-    label = select("label", code = station_code).fetch()
-    return label[0]
+    df0 = pd.read_csv(label_file, sep=";")
+    label = df.loc[
+        # rows I want
+        df["code"] == station_code ,
+        # columns I want
+        "label"
+        ]
+    return label
+
+def process_station(file):
+    """all things to do with a single station"""
+    # from csv to DataFrame
+    df1 = pd.read_csv(filepath_or_buffer = file, sep=";", decimal = ".")
+    # add derived colums
+    df1["naive_it_dt"] = df1["datetime"].apply(str2dt)
+    df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2aware)
+    df1["utc_dt"] = df1["aware_it_dt"].apply(ita2utc)
+    df1["solar_dt"] = df1["utc_dt"].apply(utc2solar)
+    return df1
 
 
-def create_excel(dataset, output_file):
-    """create a excel file with the correct content"""
-    # create an Excel Workbook for any station
-    wb = xlsxwriter.Workbook(output_file)
-    ws0 = wb.add_worksheet("metadata")
-    metadata_text = ["Questo file Excel riporta le temperature di alcune stazioni MeteoNetwork.",
-    "italy_dt è la marca temporale presente nei dati forniti da MeteoNetwork, che interpretiamo come riferita all'ora Italiana;",
-    "solar_dt è invece riferita a UTC+1 (CET), quindi indipendente dai periodi in cui vige l'ora legale.",
-    "L'orario in vigore in Italia si discosta di 0 o 1 ore dall'ora in UTC, a seconda della stagione.",]
-    for index, value in enumerate(metadata_text):
-        # row, col, data
-        ws0.write(index,0, value)
-    # create a sheet for the station
-    ws = wb.add_worksheet(station_label)
-    # write the column header to sheet
-    header = ["italy_dt", "utc_dt", "solar_dt", station_label]
-    for n,h in enumerate(header):
-        ws.write(0, n, h)
-    excel_date_format = wb.add_format({"num_format": "yyyy-mm-dd hh:mm"})
-    #excel_float_format = wb.add_format({"num_format": "0,0"})
-    # append single cells
-    ws.write_dt(row_counter + 1, 0, naive_italy_dt, excel_date_format)
-    ws.write_dt(row_counter + 1, 1, naive_utc_dt, excel_date_format)
-    ws.write_dt(row_counter + 1, 2, naive_solar_dt, excel_date_format)
-    ws.write(row_counter + 1, 3, temperature)
-    wb.close()
 
-
+# SETTINGS
+label_file = "stations.csv"
 debug = True
 
 if debug:
     input_list = glob.glob("input/lmb080.csv")
-    q1 = make_dataset("input/lmb080.csv")q1
 else:
-    # TODO check for errors
     input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
 
-#for station in input_list:
-#    drill(station)
+
+for station in input_list:
+    print(station)
+    df = process_station(station)
+    print(df.dtypes)
+    #print(df[["aware_it_dt","utc_dt"]].head)
     
 #creation_timestamp = str(int(datetime.timestamp(datetime.now())))
 #output_file = "suborari{}/Temp_{}.xlsx".format(creation_timestamp, station_label)
@@ -142,3 +140,12 @@ period_list = [
 for tup in period_list:
 """
 
+"""
+    A very powerful method on time series data with a datetime index, is the ability to resample() time series to another frequency (e.g., converting secondly data into 5-minutely data).
+
+The resample() method is similar to a groupby operation:
+
+    it provides a time-based grouping, by using a string (e.g. M, 5H,…) that defines the target frequency
+
+    it requires an aggregation function such as mean, max,…
+"""
