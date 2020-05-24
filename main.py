@@ -17,13 +17,13 @@ To apply your own or another library’s functions to pandas objects, you should
 Tablewise function application¶
 """
 import os # misc
-from datetime import datetime, timedelta # standard date functions
+#import squint # tabular data
+import datetime as Datetime # standard date functions and 
 import pytz # definitions for wall times
 import glob # wildcard for filenames matching
-#import csv # read and write csv files
+#import csv # read ean write csv files
 #import xlsxwriter # write Excel files
 import pandas as pd
-import math
 
 
 def convert_temperature(raw_temp):
@@ -36,10 +36,10 @@ def convert_temperature(raw_temp):
 def str2dt(string):
     """return a datetime object from the corresponding time string"""
     # "2013-06-20 00:30:00" 
-    dt = datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
+    dt = Datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
     return dt
 
-def naive2aware(naive_dt):
+def naive2ita(naive_dt):
     """convert a naive Italy wall time to timezone-aware dt,
     with variable offset from UTC"""
     aware_dt = pytz.timezone("Europe/Rome").localize(naive_dt)
@@ -47,17 +47,47 @@ def naive2aware(naive_dt):
 
 def ita2utc(ita_dt):
     """?"""
-    #Return a datetime object with new tzinfo attribute tz, adjusting the date 
+    # ASTIMEZONE Return a datetime object with new tzinfo attribute tz, adjusting the date 
     # and time data so the result is the same UTC time as self, but in tz’s local time.
     utc_dt = ita_dt.astimezone(pytz.timezone("UTC"))
     return utc_dt
 
 def utc2solar(utc_dt):
-    """from UTC datetime to UTC+1 (fixed offset)"""
-    #Return a datetime object with new tzinfo attribute tz, adjusting the date 
+    """?"""
+    # ASTIMEZONE Return a datetime object with new tzinfo attribute tz, adjusting the date 
     # and time data so the result is the same UTC time as self, but in tz’s local time.
-    solar_dt = utc_dt.astimezone(pytz.timezone("CET"))
+    solar_tz = Datetime.timezone(offset=Datetime.timedelta(hours=1), name="SOLAR")
+    solar_dt = utc_dt.astimezone(solar_tz)
     return solar_dt
+
+"""
+# "2013-06-20 00:30:00"
+# italy_datetime is naive
+naive_italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
+aware_utc_datetime = naive_italy_datetime.astimezone(utc)
+# solar_datetime is timezone-aware
+aware_utc_datetime = naive_italy_datetime.astimezone(utc)
+# trasform aware to naive for the benefit of ppor xlsxwriter
+naive_utc_datetime = aware_utc_datetime.replace(tzinfo=None)
+naive_solar_datetime = naive_utc_datetime + timedelta(hours=1)
+"""
+
+# def naive2solar(naive_dt):
+#     """convert a naive Italy wall time to timezone-aware dt,
+#     with fixed offset from UTC"""
+#     #solar = pytz.timezone("Etc/GMT+1").localize(naive_dt)
+#     #solar_dt = pytz.timezone("Etc/GMT+1").localize(naive_dt)
+#     solar_dt = pytz.timezone("CET").localize(naive_dt)
+#     return solar_dt
+
+# def utc2solar(utc_dt):
+#     """from UTC datetime to UTC+1 (fixed offset)
+#     using a quick and dirty trick"""
+#     #solar_dt = utc_dt.astimezone(pytz.timezone("CET"))
+#     #solar_dt = utc_dt.astimezone(pytz.timezone("Etc/GMT+1"))
+#     #naive_utc_dt = utc_dt.replace(tzinfo=None)
+#     naive_solar_dt = utc_dt + Datetime.timedelta(hours=1)
+#     return naive_solar_dt
 
 def interesting(dt, start, end):
     """Return True if datetime is between start and end, otherwise return False."""
@@ -82,28 +112,44 @@ def process_station(file):
     df1 = pd.read_csv(filepath_or_buffer = file, sep=";", decimal = ".")
     # add derived colums
     df1["naive_it_dt"] = df1["datetime"].apply(str2dt)
-    df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2aware)
+    df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2ita)
     df1["utc_dt"] = df1["aware_it_dt"].apply(ita2utc)
-    df1["solar_dt"] = df1["utc_dt"].apply(utc2solar)
+    df1["solar_dt"] = df1["aware_it_dt"].apply(utc2solar)
     return df1
 
 
+timestring =  "2013-07-25 00:30:00"
+naive = str2dt(timestring)
+ita = naive2ita(naive)
+utc = ita2utc(ita)
+solar = utc2solar(utc)
 
+#ita = pytz.timezone("Europe/Rome")
+#aware_datetime = ita.localize(naive_datetime)
+print("naive", naive, naive.tzinfo)
+print("ita", ita, ita.tzinfo)
+print("utc", utc, utc.tzinfo)
+print("solar", solar, solar.tzinfo)
+
+#utc =pytz.utc
+
+#utc_datetime = naive_datetime.astimezone(utc)
+# solar_datetime is timezone-aware
 # SETTINGS
-label_file = "stations.csv"
-debug = True
-
-if debug:
-    input_list = glob.glob("input/lmb080.csv")
-else:
-    input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
-
-
-for station in input_list:
-    print(station)
-    df = process_station(station)
-    print(df.dtypes)
-    #print(df[["aware_it_dt","utc_dt"]].head)
+# label_file = "stations.csv"
+# debug = True
+# 
+# if debug:
+#     input_list = glob.glob("input/lmb080.csv")
+# else:
+#     input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
+# 
+# 
+# for station in input_list:
+#     print(station)
+#     df = process_station(station)
+#     print(df.dtypes)
+#     print(df[["aware_it_dt","utc_dt", "solar_dt"]].head)
     
 #creation_timestamp = str(int(datetime.timestamp(datetime.now())))
 #output_file = "suborari{}/Temp_{}.xlsx".format(creation_timestamp, station_label)
