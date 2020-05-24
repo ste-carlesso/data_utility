@@ -1,0 +1,11 @@
+ 
+Note su questi file Excel.
+
+La colonna "datetime" 
++ deriva direttamente dai CVS originari, 
++ si riferisce all'ora vigente in Italia (quindi UTC+1 oppure UTC+2)
++ ha il formato_di_Excel: Testo.
+
+La colonna "solar"
++ fa riferimento all'ora solare ovvero UTC+1
++ ha formato_di_Excel: Data_e_Ora 

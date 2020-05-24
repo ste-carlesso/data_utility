@@ -3,29 +3,28 @@
 @author: Stefano Carlesso
 <s.carlesso#fondazioneomd.it>
 """
-"""
-To apply your own or another library’s functions to pandas objects, you should be aware of the three methods below. The appropriate method to use depends on whether your function expects to operate on an entire DataFrame or Series, row- or column-wise, or elementwise.
 
-    Tablewise Function Application: pipe()
-
-    Row or Column-wise Function Application: apply()
-
-    Aggregation API: agg() and transform()
-
-    Applying Elementwise Functions: applymap()
-
-Tablewise function application¶
-"""
+import datetime as da # standard date functions
+import pandas as pd
 import os # misc
-#import squint # tabular data
-import datetime as Datetime # standard date functions and 
+import time
 import pytz # definitions for wall times
 import glob # wildcard for filenames matching
+import metadata
 #import csv # read ean write csv files
 #import xlsxwriter # write Excel files
-import pandas as pd
 
-label_file = "stations.csv"
+
+
+# a list of tuples of period_label, start, end  
+# in solar Tz
+period_list = [
+    ["2013-2014", da.datetime(2013,1,1,0,1), da.datetime(2015,1,1,0,0)],
+    ["2015-2016", da.datetime(2015,1,1,0,1), da.datetime(2017,1,1,0,0)],
+    ["2017-2018", da.datetime(2017,1,1,0,1), da.datetime(2019,1,1,0,0)],
+]
+
+
 
 def convert_temperature(raw_temp):
     try:
@@ -34,15 +33,16 @@ def convert_temperature(raw_temp):
         temperature = -999.9
     return temperature
 
-def str2dt(string):
-    """return a datetime object from the corresponding time string"""
+def str2naive(string):
+    """return a naive datetime object from the corresponding time string"""
     # "2013-06-20 00:30:00" 
-    dt = Datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
+    # I know from other metadata that this is an Italian wall time
+    dt = da.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
     return dt
 
 def naive2ita(naive_dt):
     """convert a naive Italy wall time to timezone-aware dt,
-    with variable offset from UTC"""
+    with variable offset from UTC, due to Daylight saving time"""
     aware_dt = pytz.timezone("Europe/Rome").localize(naive_dt)
     return aware_dt
 
@@ -54,41 +54,25 @@ def ita2utc(ita_dt):
     return utc_dt
 
 def utc2solar(utc_dt):
-    """?"""
     # ASTIMEZONE Return a datetime object with new tzinfo attribute tz, adjusting the date 
     # and time data so the result is the same UTC time as self, but in tz’s local time.
-    solar_tz = Datetime.timezone(offset=Datetime.timedelta(hours=1), name="SOLAR")
+    solar_tz = da.timezone(offset=da.timedelta(hours=1), name="SOLAR")
     solar_dt = utc_dt.astimezone(solar_tz)
     return solar_dt
 
-"""
-# "2013-06-20 00:30:00"
-# italy_datetime is naive
-naive_italy_datetime = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
-aware_utc_datetime = naive_italy_datetime.astimezone(utc)
-# solar_datetime is timezone-aware
-aware_utc_datetime = naive_italy_datetime.astimezone(utc)
-# trasform aware to naive for the benefit of ppor xlsxwriter
-naive_utc_datetime = aware_utc_datetime.replace(tzinfo=None)
-naive_solar_datetime = naive_utc_datetime + timedelta(hours=1)
-"""
-
-# def naive2solar(naive_dt):
-#     """convert a naive Italy wall time to timezone-aware dt,
-#     with fixed offset from UTC"""
-#     #solar = pytz.timezone("Etc/GMT+1").localize(naive_dt)
-#     #solar_dt = pytz.timezone("Etc/GMT+1").localize(naive_dt)
-#     solar_dt = pytz.timezone("CET").localize(naive_dt)
-#     return solar_dt
-
-# def utc2solar(utc_dt):
-#     """from UTC datetime to UTC+1 (fixed offset)
-#     using a quick and dirty trick"""
-#     #solar_dt = utc_dt.astimezone(pytz.timezone("CET"))
-#     #solar_dt = utc_dt.astimezone(pytz.timezone("Etc/GMT+1"))
-#     #naive_utc_dt = utc_dt.replace(tzinfo=None)
-#     naive_solar_dt = utc_dt + Datetime.timedelta(hours=1)
-#     return naive_solar_dt
+def utc2naive(utc_dt):
+    # trasform aware to naive for the benefit of poor xlsxwriter
+    naive_dt = utc_dt.replace(tzinfo=None)
+    return naive_dt
+    
+def str2solar(string):        
+    # "2013-06-20 00:30:00"
+    naive_dt = da.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
+    ita_dt = pytz.timezone("Europe/Rome").localize(naive_dt)
+    utc_dt = ita_dt.astimezone(pytz.utc)
+    solar_dt = utc_dt + da.timedelta(hours=1)
+    solar_dt = solar_dt.replace(tzinfo=None)
+    return solar_dt
 
 def interesting(dt, start, end):
     """Return True if datetime is between start and end, otherwise return False."""
@@ -96,40 +80,30 @@ def interesting(dt, start, end):
 
 #def narrow_period():
 
-def create_label(station_id):
-    """read a station code (str) and returns a station name (str)"""
-    df0 = pd.read_csv(label_file, sep=";")
-    label = df0.loc[
-        # rows I want
-        df0["code"] == station_id ,
-        # columns I want
-        "label"
-        ]
-    return label
-
 def process_station(filepath):
-    """all things to do with a single station"""
+    """all things to do with a single station
+    and return a tuple  (station_label, DataFrame)
+    """
     print("processing {} please wait".format(filepath))
     # from csv to DataFrame
     df1 = pd.read_csv(filepath_or_buffer=filepath, sep=";", decimal = ".")
     #add derived colums
-    df1["naive_it_dt"] = df1["douche"].apply(str2dt)
-    df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2ita)
-    df1["utc_dt"] = df1["aware_it_dt"].apply(ita2utc)
-    df1["solar_dt"] = df1["aware_it_dt"].apply(utc2solar)
-    # TODO et station_id from filename todo: read from csv content instead
-    # for a more robust script
-    station_code = filepath[6:12]
-    station_label = create_label(station_code)
-    df1[station_label] = df1["temperature"]
-    return df1
-
+    # df1["naive_it_dt"] = df1["datetime"].apply(str2naive)
+    # df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2ita)
+    # df1["utc_dt"] = df1["aware_it_dt"].apply(ita2utc)
+    # df1["solar_dt"] = df1["aware_it_dt"].apply(utc2solar)
+    df1["solar"] = df1["datetime"].apply(str2solar)
+    # get station code from the fist field
+    station_code = df1["code"][1]
+    station_label = metadata.label_dict[station_code]
+    df1[station_label] = df1["temperature"] 
+    return (station_label, df1)
 
 def simple_test():
     """print datetime objects and timezone for poor man checking"""
     test_list =  ["2013-12-25 00:30:00", "2013-06-2 00:30:00", ]
     for timestring in test_list:
-        naive = str2dt(timestring)
+        naive = str2naive(timestring)
         ita = naive2ita(naive)
         utc = ita2utc(ita)
         solar = utc2solar(utc)
@@ -141,62 +115,44 @@ def simple_test():
 
 #SETTINGS
 
-#debug = True
+debug = False
+if debug:
+    input_list = glob.glob("input/lmb080.csv")
+else:
+    input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
 
-#if debug:
-    #input_list = glob.glob("test0/lmb080.csv")
-#else:
-    #input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
-
-#for station in input_list:
-    #print(station)
-    #df = process_station(station)
+for station in input_list:
+    # unpacking the tuple
+    label, df2 = process_station(station)
     #print(df.dtypes)
     #print(df.head)
+    df3 = df2[["code","datetime","solar", label]]
+    creation_timestamp = str(round(time.time()))
+    directory = creation_timestamp
+    os.mkdir(directory)
+    for timeframe in period_list:
+        out_path = "{}/{}_{}.xlsx".format(directory, label, timeframe[0])
+        bool_array = df3["solar"].between(timeframe[1], timeframe[2])
+        df4 = df3.loc[bool_array]
+        # todo use comma or float in excel
+        # with pd.ExcelWriter(out_path, engine="openpyxl" datetime_format="YYYY-MM-DD HH:MM:SS") as writer:
+        #     df4.to_excel(excel_writer=writer)
+        # Create a Pandas Excel writer using XlsxWriter as the engine.
+        writer = pd.ExcelWriter(out_path, engine='xlsxwriter')
+        # Convert the dataframe to an XlsxWriter Excel object.
+        df4.to_excel(writer, sheet_name='Sheet1')
+        # Get the xlsxwriter workbook and worksheet objects.
+        workbook  = writer.book
+        worksheet = writer.sheets['Sheet1']
+        # Add some cell formats.
+        format1 = workbook.add_format({'num_format': '0,0'})
+        # Set the column width (and maybe the format).
+        worksheet.set_column(0,0, 4)
+        worksheet.set_column(1,1, 6)
+        worksheet.set_column(2,2, 17)
+        worksheet.set_column(1,1, 17)
+        worksheet.set_column(3,3, 28)
+        # Close the Pandas Excel writer and output the Excel file.
+        writer.save()
 
-print(create_label("lmb080"))
-    
-#creation_timestamp = str(int(datetime.timestamp(datetime.now())))
-#output_file = "suborari{}/Temp_{}.xlsx".format(creation_timestamp, station_label)
-"""
-for filename in filename_list:
-    # get station_id from filename todo: read from csv content instead
-    station_id = filename[6:12]
-    # convert it to a pretty label
-     = 
-    print(station_id, station_label)
-    # output to ever new dir
 
-    # TODO create folder if not exists
-
-        
-    with open(filename) as file:
-        # csv header is 
-        # code;datetime;temperature
-        reader = csv.DictReader(file, delimiter=";", )
-        for row_counter, row in enumerate(reader):
-
-                        
-
-
-
-if naive_solar_datetime >= tup[1] and naive_solar_datetime <= tup[2]:  
-# a list of tuples of period_label, start, end  
-period_list = [
-    ["2013-2014", datetime(2013,1,1,0,1), datetime(2015,1,1,0,0)],
-    ["2015-2016", datetime(2015,1,1,0,1), datetime(2017,1,1,0,0)],
-    ["2017-2018", datetime(2017,1,1,0,1), datetime(2019,1,1,0,0)],
-    ]
-#Excel Workbook for any combination of station and period
-for tup in period_list:
-"""
-
-"""
-    A very powerful method on time series data with a datetime index, is the ability to resample() time series to another frequency (e.g., converting secondly data into 5-minutely data).
-
-The resample() method is similar to a groupby operation:
-
-    it provides a time-based grouping, by using a string (e.g. M, 5H,…) that defines the target frequency
-
-    it requires an aggregation function such as mean, max,…
-"""
