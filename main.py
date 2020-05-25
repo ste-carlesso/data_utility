@@ -113,7 +113,6 @@ def simple_test():
         print("solar", solar, solar.tzinfo)
 
 
-#SETTINGS
 
 debug = False
 if debug:
@@ -121,22 +120,20 @@ if debug:
 else:
     input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
 
+creation_timestamp = str(round(time.time()))
+directory = creation_timestamp
+os.mkdir(directory)
+
 for station in input_list:
     # unpacking the tuple
     label, df2 = process_station(station)
     #print(df.dtypes)
     #print(df.head)
     df3 = df2[["code","datetime","solar", label]]
-    creation_timestamp = str(round(time.time()))
-    directory = creation_timestamp
-    os.mkdir(directory)
     for timeframe in period_list:
         out_path = "{}/{}_{}.xlsx".format(directory, label, timeframe[0])
         bool_array = df3["solar"].between(timeframe[1], timeframe[2])
         df4 = df3.loc[bool_array]
-        # todo use comma or float in excel
-        # with pd.ExcelWriter(out_path, engine="openpyxl" datetime_format="YYYY-MM-DD HH:MM:SS") as writer:
-        #     df4.to_excel(excel_writer=writer)
         # Create a Pandas Excel writer using XlsxWriter as the engine.
         writer = pd.ExcelWriter(out_path, engine='xlsxwriter')
         # Convert the dataframe to an XlsxWriter Excel object.
