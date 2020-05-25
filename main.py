@@ -84,7 +84,7 @@ def process_station(filepath):
     """all things to do with a single station
     and return a tuple  (station_label, DataFrame)
     """
-    print("processing {} please wait".format(filepath))
+    print("processing {} {}".format(filepath, creation_timestamp))
     # from csv to DataFrame
     df1 = pd.read_csv(filepath_or_buffer=filepath, sep=";", decimal = ".")
     #add derived colums
