@@ -82,3 +82,14 @@ lmb179;45,5100361481069;9,5751686085714;125;Davis Vantage Pro Plus 2;Lombardia;T
 lmb175;45,07;8,85;76;Davis Vantage Pro 2;Lombardia;Mezzana Bigli;;PV;Mezzana Bigli;Mezzana Bigli
 
 """
+
+
+## Aggiornamento 2020-06-03
+
+Per prima cosa andranno elaborati i dati (da ora italiana a ora solare, solo un decimale) anche per i dati contenuti in fomd3.tar.gz
+che si riferiscono al periodo 2019-2019.
+
+
+Per seconda cosa si prenderanno i dati di [fomd1, fomd2, fomd3] (tar.gz), per 14 stazioni, e si calcolerà la media oraria.
+il dato delle ore 8:00 (fine misura) sarà prodotto in base ai record del periodo dalle 07:00:01 alle 08:00:00 ().
+Non ci devono essere buchi, ovvero tutte le ore devono essere presenti, con un valore che indichi dato mancante, ossia o -999 oppure cella vuota.

@@ -16,16 +16,6 @@ import metadata
 
 
 
-# a list of tuples of period_label, start, end  
-# in solar Tz
-period_list = [
-    ["2013-2014", da.datetime(2013,1,1,0,1), da.datetime(2015,1,1,0,0)],
-    ["2015-2016", da.datetime(2015,1,1,0,1), da.datetime(2017,1,1,0,0)],
-    ["2017-2018", da.datetime(2017,1,1,0,1), da.datetime(2019,1,1,0,0)],
-]
-
-
-
 def convert_temperature(raw_temp):
     try:
         temperature = round(float(raw_temp), ndigits=1)
@@ -115,10 +105,23 @@ def simple_test():
 
 
 debug = False
+
 if debug:
-    input_list = glob.glob("input/lmb080.csv")
+    input_list = glob.glob("fomd3/lmb080.csv")
 else:
-    input_list = glob.glob("input/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
+    input_list = glob.glob("fomd3/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
+
+# a list of tuples of period_label, start, end  
+# in solar Tz
+# period_list = [
+#     ["2013-2014", da.datetime(2013,1,1,0,1), da.datetime(2015,1,1,0,0)],
+#     ["2015-2016", da.datetime(2015,1,1,0,1), da.datetime(2017,1,1,0,0)],
+#     ["2017-2018", da.datetime(2017,1,1,0,1), da.datetime(2019,1,1,0,0)],
+# ]
+period_list = [
+    ["2018-2019", da.datetime(2018,1,1,0,1), da.datetime(2020,1,1,0,0)],
+]
+
 
 creation_timestamp = str(round(time.time()))
 directory = creation_timestamp
@@ -141,7 +144,7 @@ for station in input_list:
         # Get the xlsxwriter workbook and worksheet objects.
         workbook  = writer.book
         worksheet = writer.sheets['Sheet1']
-        # Add some cell formats.
+        # Add some cell formats
         format1 = workbook.add_format({'num_format': '0,0'})
         # Set the column width (and maybe the format).
         worksheet.set_column(0,0, 4)
@@ -151,5 +154,8 @@ for station in input_list:
         worksheet.set_column(3,3, 28)
         # Close the Pandas Excel writer and output the Excel file.
         writer.save()
+    # start = df3["solar"].min()
+    # end = df3["solar"].max()
+    # print("{} {} {}".format(label, start, end))
 
 
