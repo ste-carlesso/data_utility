@@ -1,115 +1,16 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Stefano Carlesso
-<s.carlesso#fondazioneomd.it>
-"""
-
-import datetime as da # standard date functions
-import pandas as pd
-import os # misc
-import time
-import pytz # definitions for wall times
-import glob # wildcard for filenames matching
-import metadata
-#import csv # read ean write csv files
-#import xlsxwriter # write Excel files
-
-
-
-def convert_temperature(raw_temp):
-    try:
-        temperature = round(float(raw_temp), ndigits=1)
-    except: 
-        temperature = -999.9
-    return temperature
-
-def str2naive(string):
-    """return a naive datetime object from the corresponding time string"""
-    # "2013-06-20 00:30:00" 
-    # I know from other metadata that this is an Italian wall time
-    dt = da.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    return dt
-
-def naive2ita(naive_dt):
-    """convert a naive Italy wall time to timezone-aware dt,
-    with variable offset from UTC, due to Daylight saving time"""
-    aware_dt = pytz.timezone("Europe/Rome").localize(naive_dt)
-    return aware_dt
-
-def ita2utc(ita_dt):
-    """?"""
-    # ASTIMEZONE Return a datetime object with new tzinfo attribute tz, adjusting the date 
-    # and time data so the result is the same UTC time as self, but in tz’s local time.
-    utc_dt = ita_dt.astimezone(pytz.timezone("UTC"))
-    return utc_dt
-
-def utc2solar(utc_dt):
-    # ASTIMEZONE Return a datetime object with new tzinfo attribute tz, adjusting the date 
-    # and time data so the result is the same UTC time as self, but in tz’s local time.
-    solar_tz = da.timezone(offset=da.timedelta(hours=1), name="SOLAR")
-    solar_dt = utc_dt.astimezone(solar_tz)
-    return solar_dt
-
-def utc2naive(utc_dt):
-    # trasform aware to naive for the benefit of poor xlsxwriter
-    naive_dt = utc_dt.replace(tzinfo=None)
-    return naive_dt
-    
-def str2solar(string):        
-    # "2013-06-20 00:30:00"
-    naive_dt = da.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
-    ita_dt = pytz.timezone("Europe/Rome").localize(naive_dt)
-    utc_dt = ita_dt.astimezone(pytz.utc)
-    solar_dt = utc_dt + da.timedelta(hours=1)
-    solar_dt = solar_dt.replace(tzinfo=None)
-    return solar_dt
-
-def interesting(dt, start, end):
-    """Return True if datetime is between start and end, otherwise return False."""
-    return dt >= start and dt <= end
-
-#def narrow_period():
-
-def process_station(filepath):
-    """all things to do with a single station
-    and return a tuple  (station_label, DataFrame)
-    """
-    print("processing {} {}".format(filepath, creation_timestamp))
-    # from csv to DataFrame
-    df1 = pd.read_csv(filepath_or_buffer=filepath, sep=";", decimal = ".")
-    #add derived colums
-    # df1["naive_it_dt"] = df1["datetime"].apply(str2naive)
-    # df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2ita)
-    # df1["utc_dt"] = df1["aware_it_dt"].apply(ita2utc)
-    # df1["solar_dt"] = df1["aware_it_dt"].apply(utc2solar)
-    df1["solar"] = df1["datetime"].apply(str2solar)
-    # get station code from the fist field
-    station_code = df1["code"][1]
-    station_label = metadata.label_dict[station_code]
-    df1[station_label] = df1["temperature"] 
-    return (station_label, df1)
-
-def simple_test():
-    """print datetime objects and timezone for poor man checking"""
-    test_list =  ["2013-12-25 00:30:00", "2013-06-2 00:30:00", ]
-    for timestring in test_list:
-        naive = str2naive(timestring)
-        ita = naive2ita(naive)
-        utc = ita2utc(ita)
-        solar = utc2solar(utc)
-        print("naive", naive, naive.tzinfo)
-        print("ita", ita, ita.tzinfo)
-        print("utc", utc, utc.tzinfo)
-        print("solar", solar, solar.tzinfo)
-
-
+from libreria import *
 
 debug = False
 
-if debug:
-    input_list = glob.glob("fomd3/lmb080.csv")
-else:
-    input_list = glob.glob("fomd3/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
+
+good_stations = ["lmb080", "lmb136", "lmb167", "lmb168", "lmb170", "lmb175", "lmb179", "lmb191", "lmb220", "lmb238", "lmb254", "lmb267", "lmb286", "pmn047",]
+
+# if debug:
+#     input_list = glob.glob("fomd3/lmb080.csv")
+# else:
+#     input_list = glob.glob("fomd3/[a-z][a-z][a-z][0-9][0-9][0-9].csv")
+
+
 
 # a list of tuples of period_label, start, end  
 # in solar Tz
@@ -122,12 +23,18 @@ period_list = [
     ["2018-2019", da.datetime(2018,1,1,0,1), da.datetime(2020,1,1,0,0)],
 ]
 
-
 creation_timestamp = str(round(time.time()))
 directory = creation_timestamp
 os.mkdir(directory)
 
-for station in input_list:
+for station in good_stations:
+    df_list = []
+    for directory in ["fomd1", "fomd2", "fomd3"]
+        path = "fomd1/{}.csv".format(station)
+        df = pd.read_csv(filepath_or_buffer=path, sep=";", decimal =".")
+        df_list.append(df)  
+    # unite csv from the tree input_dirs
+
     # unpacking the tuple
     label, df2 = process_station(station)
     #print(df.dtypes)
@@ -157,5 +64,7 @@ for station in input_list:
     # start = df3["solar"].min()
     # end = df3["solar"].max()
     # print("{} {} {}".format(label, start, end))
+
+
 
 
