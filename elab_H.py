@@ -5,44 +5,10 @@
 from libreria import *
 
 
-def create_excel(df, out_path):
-    # Create a Pandas Excel writer using XlsxWriter as the engine.
-    writer = pd.ExcelWriter(out_path, engine='xlsxwriter')
-    # Convert the dataframe to an XlsxWriter Excel object.
-    df.to_excel(writer, sheet_name='Sheet1')
-    # Get the xlsxwriter workbook and worksheet objects.
-    workbook  = writer.book
-    worksheet = writer.sheets['Sheet1']
-    # Add some cell formats
-    format1 = workbook.add_format({'num_format': '0,0'})
-    # Set the column width (and maybe the format).
-    worksheet.set_column(0,0, 4)
-    worksheet.set_column(1,1, 6)
-    worksheet.set_column(2,2, 17)
-    worksheet.set_column(1,1, 17)
-    worksheet.set_column(3,3, 28)
-    # Close the Pandas Excel writer and output the Excel file.
-    writer.save()
-    # start = df["solar"].min()
-    # end = df["solar"].max()
-    # print("{} {} {}".format(label, start, end)) 
-
-
 debug = True
 
 if debug:
     good_stations = ["lmb080",]
-
-# a list of tuples of period_label, start, end  
-# in solar Tz
-# period_list = [
-#     ["2013-2014", da.datetime(2013,1,1,0,1), da.datetime(2015,1,1,0,0)],
-#     ["2015-2016", da.datetime(2015,1,1,0,1), da.datetime(2017,1,1,0,0)],
-#     ["2017-2018", da.datetime(2017,1,1,0,1), da.datetime(2019,1,1,0,0)],
-# ]
-period_list = [
-    ["2018-2019", da.datetime(2018,1,1,0,1), da.datetime(2020,1,1,0,0)],
-]
 
 creation_timestamp = str(round(time.time()))
 output_dir = creation_timestamp
