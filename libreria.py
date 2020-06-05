@@ -24,6 +24,10 @@ def create_label(station_id):
 
 """
 
+# these are the stations our Scientist selected as good for ClimaMI Elaborations
+good_stations = ["lmb080", "lmb136", "lmb167", "lmb168", "lmb170", "lmb175", "lmb179", "lmb191", "lmb220", "lmb238", "lmb254", "lmb267", "lmb286", "pmn047",]
+
+
 label_dict = {
     "lmb242": "Abbadia Lariana",
     "lmb275": "Albese con Cassano",
@@ -181,30 +185,28 @@ def str2solar(string):
     return solar_dt
 
 def interesting(dt, start, end):
-    """Return True if datetime is between start and end, otherwise return False."""
+    """Return True if datetime is between start and end, 
+    otherwise return False."""
     return dt >= start and dt <= end
 
-def process_files():
-    df1 = pd.read_csv(filepath_or_buffer=filepath, sep=";", decimal = ".")
 
-def process_station(filepath):
+def process_df(df):
     """all things to do with a single station
     and return a tuple  (station_label, DataFrame)
     """
-    print("processing {} {}".format(filepath, creation_timestamp))
     # from csv to DataFrame
-    df1 = pd.read_csv(filepath_or_buffer=filepath, sep=";", decimal = ".")
+    #df = pd.read_csv(filepath_or_buffer=filepath, sep=";", decimal = ".")
     #add derived colums
-    # df1["naive_it_dt"] = df1["datetime"].apply(str2naive)
-    # df1["aware_it_dt"] = df1["naive_it_dt"].apply(naive2ita)
-    # df1["utc_dt"] = df1["aware_it_dt"].apply(ita2utc)
-    # df1["solar_dt"] = df1["aware_it_dt"].apply(utc2solar)
-    df1["solar"] = df1["datetime"].apply(str2solar)
+    # df["naive_it_dt"] = df["datetime"].apply(str2naive)
+    # df["aware_it_dt"] = df["naive_it_dt"].apply(naive2ita)
+    # df["utc_dt"] = df["aware_it_dt"].apply(ita2utc)
+    # df["solar_dt"] = df["aware_it_dt"].apply(utc2solar)
+    df["solar"] = df["datetime"].apply(str2solar)
     # get station code from the fist field
-    station_code = df1["code"][1]
-    station_label = metadata.label_dict[station_code]
-    df1[station_label] = df1["temperature"] 
-    return (station_label, df1)
+    station_code = df["code"][1]
+    station_label = label_dict[station_code]
+    df[station_label] = df["temperature"] 
+    return (station_label, df)
 
 def simple_test():
     """print datetime objects and timezone for poor man checking"""
@@ -221,3 +223,14 @@ def simple_test():
 
 
 
+def hour_mean(df):
+    """create a mean of all values I have in the delta of time of 1 hour
+    I assign the result to the last possible value
+
+    Si prendono i dati di temperatura di [fomd1, fomd2, fomd3] (tar.gz), 
+    per 14 stazioni, e si calcolerà la media oraria.
+    Il dato delle ore 8:00 (fine misura) sarà prodotto in base ai record del 
+    periodo dalle 07:00:01 alle 08:00:00 ().
+    Non ci devono essere buchi, ovvero tutte le ore devono essere presenti, con 
+    un valore che indichi dato mancante, ossia o -999 oppure cella vuota.
+    """

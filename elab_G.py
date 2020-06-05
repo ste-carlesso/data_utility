@@ -1,3 +1,4 @@
+"""Elaborazione G, divisi per periodo di tempo"""
 from libreria import *
 
 debug = False
