@@ -27,8 +27,8 @@ for station in good_stations:
     df0_list = []
     for input_dir in ["fomd1", "fomd2", "fomd3"]:
         path = "{}/{}.csv".format(input_dir, station)
-        df00 = pd.read_csv(filepath_or_buffer=path, sep=";", decimal =".")
-        df00_list.append(df)
+        df0 = pd.read_csv(filepath_or_buffer=path, sep=";", decimal =".")
+        df0_list.append(df0)
     # unite csv from the tree input_dirs
     #unite A and B to X
     df1 = pd.merge(
