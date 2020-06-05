@@ -2,7 +2,7 @@
 
 
 """
-from libreria import *
+from libreria import (good_stations, good_stations, pd, str2solar, os, time, label_dict)
 
 
 debug = True
