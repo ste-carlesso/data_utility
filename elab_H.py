@@ -17,7 +17,7 @@ os.mkdir(output_dir)
 for station in good_stations:
     df0_list = []
     for input_dir in ["fomd1", "fomd2", "fomd3"]:
-        path = "{}/{}.csv".format(input_dir, station)
+        path = "../input/{}/{}.csv".format(input_dir, station)
         df0 = pd.read_csv(filepath_or_buffer=path, sep=";", decimal =".")
         df0["solar"] = df0["datetime"].apply(str2solar)
         # get station code from the fist field
@@ -29,12 +29,14 @@ for station in good_stations:
         df0 = df0[["solar", station_label]]
         df0_list.append(df0)
     # unite the first two dataframes
-    df1 = pd.merge(df0_list[0], df0_list[1], how="outer", on="solar")
+    # df1 = pd.merge(df0_list[0], df0_list[1], how="outer", on="solar")
     # unite resulting dataframe to the third one
-    df2 = pd.merge(df1, df0_list[2], how="outer", on="solar")
+    # df2 = pd.merge(df1, df0_list[2], how="outer", on="solar")
+    df3 = pd.concat(df0_list)
     # just the columns I want
     the_output_path = "{}/{}_orari.xlsx".format(output_dir, station_label)
     #create_excel(df4, the_output_path)
+print(df3)
 
 
 

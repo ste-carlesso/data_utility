@@ -1,9 +1,10 @@
 __pycache__
+.ipynb_checkpoints
 .vscode
-input
-dati
-suborari
-output
 *.xlsx
-fomd?.tar.gz
+dati
 fomd?
+fomd?.tar.gz
+input
+output
+suborari

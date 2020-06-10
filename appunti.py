@@ -73,9 +73,3 @@ def create_excel(dataframe, file_path, last_fieldname):
             ws.write(row_counter + 1, 3, last_fieldname, format2)    
         wb.close()
 
-
-
-
-
-
-#OS TIPS

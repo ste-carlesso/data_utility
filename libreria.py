@@ -27,6 +27,8 @@ def create_label(station_id):
 # these are the stations our Scientist selected as good for ClimaMI Elaborations
 good_stations = ["lmb080", "lmb136", "lmb167", "lmb168", "lmb170", "lmb175", "lmb179", "lmb191", "lmb220", "lmb238", "lmb254", "lmb267", "lmb286", "pmn047",]
 
+bad_stations = ["lmb168", "lmb267", "pmn047"] # they have duplicate index
+
 
 label_dict = {
     "lmb242": "Abbadia Lariana",
