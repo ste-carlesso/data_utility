@@ -4,6 +4,7 @@ from libreria import good_stations, label_dict, create_excel
 import pandas as pd
 import numpy as np
 import pytz, os, time
+from datetime import timedelta as tdelta
 
 
 good_stations = ["lmb168"] # they have duplicate index
@@ -29,24 +30,25 @@ def strip_tz(bad_time):
 
 for station in good_stations:
     s0_list = []
-    for input_dir in ["bad"]:
+    for input_dir in ["fomd1", "fomd2", "fomd3"]:
         path = "../input/{}/{}.csv".format(input_dir, station)
-        s = pd.read_csv( filepath_or_buffer=path, sep=";", header=0, 
+        s_wall = pd.read_csv( filepath_or_buffer=path, sep=";", header=0, 
             usecols=["datetime", "temperature"], index_col="datetime", 
             squeeze=True, parse_dates=True, )
         # # remove bad value
         # a = s.index
         # b = a.drop(labels=["2013-10-27 02:01:00"])
         # s_good  = s.loc(b)
-        #all_true= np.full(shape=s_wall.shape, fill_value=True)
+        all_true= np.full(shape=s_wall.shape, fill_value=True)
+        all_false= np.full(shape=s_wall.shape, fill_value=False)
+        offset=tdelta(hours=1)
         # convert index of Series between Timezones
-        s_ita = s.tz_localize(ita, ambiguous="infer", nonexistent="shift_forward" )
-        s_utc = s_ita.tz_convert(utc)
+        s_ita = s_wall.tz_localize(ita, ambiguous=all_true, nonexistent="shift_forward" )
+        # the next line saves the day
+        s_good = s_ita.drop_duplicates(keep="first")
+        #s_utc = s_good.tz_convert(utc)
         s_sol = s_ita.tz_convert(sol)
-        s0_list.append(s_utc)
-
-    # for k in [0,20,150,-1]:
-    #     print(s_ita[[k]], s_utc[[k]], s_sol[[k]])
+        s0_list.append(s_sol)
 
     station_label = label_dict[station]
     # unite the series into one
@@ -59,7 +61,6 @@ for station in good_stations:
                 index_label=["solar",])
     s2.to_csv(path_or_buf=out_csv2, sep=";", header=[ station_label,],
                 index_label=["solar",])
-
 
     # Naive Series for poor Excel
     df = pd.DataFrame(data=s2)
