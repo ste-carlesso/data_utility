@@ -4,7 +4,8 @@
 """
 PANDAS TIPS
 
-To apply your own or another library’s functions to pandas objects, you should be aware of the three methods below. The appropriate method to use depends on whether your function expects to operate on an entire DataFrame or Series, row- or column-wise, or elementwise.
+To apply your own or another library’s functions to pandas objects, you should be aware of the three methods below. 
+The appropriate method to use depends on whether your function expects to operate on an entire DataFrame or Series, row- or column-wise, or elementwise.
 
     Tablewise Function Application: pipe()
 
@@ -73,3 +74,7 @@ def create_excel(dataframe, file_path, last_fieldname):
             ws.write(row_counter + 1, 3, last_fieldname, format2)    
         wb.close()
 
+
+
+#SElect and slicing
+df1.query("(naive_dt > datetime(2013, 12, 1))")
