@@ -41,7 +41,6 @@ label_dict = {
     "lmb240": "Alzate Brianza",
     "lmb372": "Arcore",
     "lmb010": "Barlassina",
-    "lmb002": "Barzio",
     "lmb302": "Berbenno-- centro",
     "lmb166": "Besana in Brianza--Naresso",
     "lmb123": "Besana in Brianza--Villa Raverio",
@@ -136,14 +135,12 @@ label_dict = {
 }
 
 
-# a list of tuples of period_label, start, end  (solar Timezone)
-# period_list = [
-#     ["2013-2014", da.datetime(2013,1,1,0,1), da.datetime(2015,1,1,0,0)],
-#     ["2015-2016", da.datetime(2015,1,1,0,1), da.datetime(2017,1,1,0,0)],
-#     ["2017-2018", da.datetime(2017,1,1,0,1), da.datetime(2019,1,1,0,0)],
-# ]
+#a list of tuples of period_label, start, end  (solar Timezone)
 period_list = [
-    ["2018-2019", da.datetime(2018,1,1,0,1), da.datetime(2020,1,1,0,0)],
+    ["2013-2014", da.datetime(2013,1,1,0,1), da.datetime(2015,1,1,0,0)],
+    ["2015-2016", da.datetime(2015,1,1,0,1), da.datetime(2017,1,1,0,0)],
+    ["2017-2018", da.datetime(2017,1,1,0,1), da.datetime(2019,1,1,0,0)],
+    ["2019-2020", da.datetime(2019,1,1,0,1), da.datetime(2021,1,1,0,0)],
 ]
 
 
