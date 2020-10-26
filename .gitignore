@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 __pycache__/*
 .vscode
 input
@@ -7,3 +8,16 @@ output
 *.xlsx
 fomd?.tar.gz
 fomd?
+=======
+__pycache__
+.ipynb_checkpoints
+.vscode
+*.xlsx
+dati
+fomd?
+fomd?.tar.gz
+input
+output
+suborari
+log.txt
+>>>>>>> 99cb232a4dae5987ebab76e40ba5badd50a7db95
